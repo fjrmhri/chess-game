@@ -1,7 +1,14 @@
 import { Timestamp } from "firebase/firestore";
 import { Color } from "chess.js";
 
-export type GameStatus = "waiting" | "in_progress" | "checkmate" | "stalemate" | "draw";
+export type GameMode = "multiplayer" | "bot";
+export type GameStatus =
+  | "waiting"
+  | "in_progress"
+  | "checkmate"
+  | "stalemate"
+  | "draw"
+  | "resigned";
 
 export interface Player {
   id: string;
@@ -18,8 +25,12 @@ export interface Game {
   };
   status: GameStatus;
   turn: "w" | "b";
-  createdAt: Timestamp;
-  chat: ChatMessage[];
+  winner: Color | null;
+  mode: GameMode;
+  createdAt?: Timestamp;
+  chat?: ChatMessage[];
+  presence?: PresenceState;
+  lastMoveAt?: Timestamp | null;
 }
 
 export interface ChatMessage {
@@ -28,4 +39,14 @@ export interface ChatMessage {
   sender: Color;
   uid: string;
   timestamp: Timestamp;
+}
+
+export interface PresenceState {
+  w: PresenceSnapshot;
+  b: PresenceSnapshot;
+}
+
+export interface PresenceSnapshot {
+  online: boolean;
+  lastActive: Timestamp | null;
 }

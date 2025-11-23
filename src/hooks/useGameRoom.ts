@@ -66,16 +66,43 @@ export function useGameRoom(gameId: string) {
     const gameUnsubscribe = onSnapshot(gameRef,
       (docSnap) => {
         if (docSnap.exists()) {
-          const gameData = { id: docSnap.id, ...docSnap.data() } as Game;
+          const rawData = docSnap.data();
+          const gameData = {
+            id: docSnap.id,
+            winner: null,
+            mode: "multiplayer" as const,
+            presence: {
+              w: { online: false, lastActive: null },
+              b: { online: false, lastActive: null },
+            },
+            ...rawData,
+          } as Game;
 
           // Otomatis mengisi slot kosong agar pemain langsung terdaftar di papan
           if (user.uid !== gameData.players.w && user.uid !== gameData.players.b) {
             if (gameData.players.w === null) {
-              updateDoc(gameRef, { "players.w": user.uid }).catch((joinError) => {
+              updateDoc(gameRef, {
+                "players.w": user.uid,
+                mode: gameData.mode ?? "multiplayer",
+                presence: {
+                  ...(gameData.presence ?? {}),
+                  w: { online: true, lastActive: serverTimestamp() },
+                  b: gameData.presence?.b ?? { online: false, lastActive: null },
+                },
+              }).catch((joinError) => {
                 console.error("Failed to join as white:", joinError);
               });
             } else if (gameData.players.b === null) {
-              updateDoc(gameRef, { "players.b": user.uid, status: "in_progress" }).catch((joinError) => {
+              updateDoc(gameRef, {
+                "players.b": user.uid,
+                status: "in_progress",
+                mode: gameData.mode ?? "multiplayer",
+                presence: {
+                  ...(gameData.presence ?? {}),
+                  b: { online: true, lastActive: serverTimestamp() },
+                  w: gameData.presence?.w ?? { online: false, lastActive: null },
+                },
+              }).catch((joinError) => {
                 console.error("Failed to join as black:", joinError);
               });
             }
@@ -136,8 +163,11 @@ export function useGameRoom(gameId: string) {
         }
 
         let newStatus: GameStatus = "in_progress";
-        if (chess.isCheckmate()) newStatus = "checkmate";
-        else if (chess.isStalemate()) newStatus = "stalemate";
+        let winner: Color | null = null;
+        if (chess.isCheckmate()) {
+          newStatus = "checkmate";
+          winner = chess.turn() === "w" ? "b" : "w";
+        } else if (chess.isStalemate()) newStatus = "stalemate";
         else if (chess.isDraw()) newStatus = "draw";
 
         // Memperbarui dokumen permainan agar kedua pemain menerima keadaan terbaru
@@ -146,6 +176,14 @@ export function useGameRoom(gameId: string) {
           pgn: chess.pgn(),
           turn: chess.turn(),
           status: newStatus,
+          winner,
+          lastMoveAt: serverTimestamp(),
+          presence: playerColor
+            ? {
+                ...(game.presence ?? {}),
+                [playerColor]: { online: true, lastActive: serverTimestamp() },
+              }
+            : game.presence,
         });
       } catch (e) {
         console.error("Failed to make move:", e);
@@ -161,6 +199,24 @@ export function useGameRoom(gameId: string) {
     },
     [chess, game, playerColor, gameId, toast]
   );
+
+  const resign = useCallback(async () => {
+    if (!playerColor) return;
+    try {
+      await updateDoc(doc(db, "games", gameId), {
+        status: "resigned",
+        winner: playerColor === "w" ? "b" : "w",
+        lastMoveAt: serverTimestamp(),
+      });
+    } catch (error) {
+      console.error("Failed to resign:", error);
+      toast({
+        title: "Resign Failed",
+        description: "Unable to resign right now. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, [gameId, playerColor, toast]);
 
   const sendMessage = useCallback(
     async (text: string) => {
@@ -184,5 +240,55 @@ export function useGameRoom(gameId: string) {
     [user, playerColor, gameId, toast]
   );
 
-  return { game, chess, playerColor, loading, error, makeMove, sendMessage, chatMessages };
+  const updatePresence = useCallback(
+    async (online: boolean) => {
+      if (!playerColor) return;
+      try {
+        await updateDoc(doc(db, "games", gameId), {
+          presence: {
+            ...(game?.presence ?? {}),
+            [playerColor]: { online, lastActive: serverTimestamp() },
+          },
+        });
+      } catch (err) {
+        console.error("Failed to update presence", err);
+      }
+    },
+    [game?.presence, gameId, playerColor]
+  );
+
+  useEffect(() => {
+    if (!playerColor) return;
+
+    updatePresence(true);
+
+    const handleVisibilityChange = () => {
+      updatePresence(document.visibilityState === "visible");
+    };
+
+    const handleBeforeUnload = () => {
+      updatePresence(false);
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      updatePresence(false);
+    };
+  }, [playerColor, updatePresence]);
+
+  return {
+    game,
+    chess,
+    playerColor,
+    loading,
+    error,
+    makeMove,
+    sendMessage,
+    resign,
+    chatMessages,
+  };
 }

@@ -3,8 +3,9 @@
 import { useState } from "react";
 
 import { useRouter } from "next/navigation";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { Timestamp, addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { Loader2, Swords } from "lucide-react";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,8 +32,14 @@ export default function Home() {
         players: { w: null, b: null },
         status: "waiting",
         turn: "w",
-        createdAt: serverTimestamp(),
-        chat: [],
+        createdAt: serverTimestamp() as unknown as Timestamp,
+        winner: null,
+        mode: "multiplayer",
+        presence: {
+          w: { online: false, lastActive: null },
+          b: { online: false, lastActive: null },
+        },
+        lastMoveAt: null,
       };
       const gameCollection = collection(db, "games");
       const docRef = await addDoc(gameCollection, newGame);
@@ -68,7 +75,7 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-background">
       <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary/10 via-transparent to-accent/10"></div>
-      <Card className="w-full max-w-md z-10 shadow-2xl">
+      <Card className="w-full max-w-3xl z-10 shadow-2xl">
         <CardHeader className="text-center">
           <div className="flex justify-center items-center gap-3 mb-2">
             <Swords className="w-8 h-8 text-primary" />
@@ -77,7 +84,7 @@ export default function Home() {
           <CardDescription>Create a new match or join an existing one.</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-6">
+          <div className="grid md:grid-cols-2 gap-6">
             <Button
               onClick={handleCreateGame}
               disabled={isCreating || isJoining}
@@ -87,36 +94,42 @@ export default function Home() {
               {isCreating ? (
                 <Loader2 className="animate-spin" />
               ) : (
-                "Create New Game"
+                "Multiplayer: Create Room"
               )}
             </Button>
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
+            <div className="space-y-4">
+              <form onSubmit={handleJoinGame} className="space-y-4">
+                <Input
+                  value={joinCode}
+                  onChange={(e) => setJoinCode(e.target.value)}
+                  placeholder="Enter Game ID"
+                  className="text-center text-base"
+                  disabled={isCreating || isJoining}
+                />
+                <Button
+                  type="submit"
+                  variant="secondary"
+                  className="w-full"
+                  disabled={isCreating || isJoining || !joinCode.trim()}
+                >
+                  {isJoining ? <Loader2 className="animate-spin" /> : "Join Multiplayer Game"}
+                </Button>
+              </form>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span className="h-px flex-1 bg-border" />
+                <span>or</span>
+                <span className="h-px flex-1 bg-border" />
               </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">
-                  Or Join a Game
-                </span>
+              <div className="rounded-lg border p-4 bg-muted/40 space-y-3">
+                <div className="font-semibold">Solo Practice</div>
+                <p className="text-sm text-muted-foreground">
+                  Want to test lines quickly? Play against the built-in bot locally with the same board controls.
+                </p>
+                <Button asChild variant="outline" className="w-full">
+                  <Link href="/bot">Play vs Bot</Link>
+                </Button>
               </div>
             </div>
-            <form onSubmit={handleJoinGame} className="space-y-4">
-              <Input
-                value={joinCode}
-                onChange={(e) => setJoinCode(e.target.value)}
-                placeholder="Enter Game ID"
-                className="text-center text-base"
-                disabled={isCreating || isJoining}
-              />
-              <Button
-                type="submit"
-                variant="secondary"
-                className="w-full"
-                disabled={isCreating || isJoining || !joinCode.trim()}
-              >
-                {isJoining ? <Loader2 className="animate-spin" /> : "Join Game"}
-              </Button>
-            </form>
             {actionError ? (
               <p className="text-sm text-destructive text-center" role="alert">
                 {actionError}

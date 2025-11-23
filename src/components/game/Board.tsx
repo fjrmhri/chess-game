@@ -65,7 +65,7 @@ export function Board({ chess, onMove, playerColor, isPlayerTurn, isGameOver }: 
     : [];
 
   return (
-    <div className="relative aspect-square w-full select-none">
+    <div className="relative aspect-square w-full max-w-[640px] mx-auto select-none">
       {boardOrientation.map((row, rowIndex) => (
         <div key={rowIndex} className="flex">
           {row.map((piece, colIndex) => {
