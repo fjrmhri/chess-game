@@ -1,3 +1,12 @@
+<p align="center">
+  <img src="https://img.shields.io/github/stars/fjrmhri/Pomo-Pixel?style=for-the-badge&logo=github&color=8b5cf6" alt="Stars"/>
+  <img src="https://img.shields.io/github/license/fjrmhri/Pomo-Pixel?style=for-the-badge&color=10b981" alt="License"/>
+  <img src="https://img.shields.io/badge/Next.js-15.3.3-black?style=for-the-badge&logo=next.js" alt="Next.js"/>
+  <img src="https://img.shields.io/badge/Firebase-11.9.1-FFCA28?style=for-the-badge&logo=firebase" alt="Firebase"/>
+  <img src="https://img.shields.io/badge/TailwindCSS-3.4.1-38bdf8?style=for-the-badge&logo=tailwind-css" alt="TailwindCSS"/>
+</p>
+
+
 # Firebase Chess Royale
 
 Real-time chess with Next.js (React + TypeScript) on Firebase. Create or join multiplayer rooms that sync boards, moves, and chat through Firestore, or play locally against a built-in bot—all using the same polished UI. Deploy quickly to Vercel without custom servers.
