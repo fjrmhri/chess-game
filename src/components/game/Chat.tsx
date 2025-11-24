@@ -38,7 +38,7 @@ export function Chat({ playerColor, messages, onSendMessage }: ChatProps) {
   };
 
   return (
-    <Card className="flex flex-col h-96">
+    <Card className="flex h-full min-h-[420px] flex-col">
       <CardHeader className="flex flex-row items-center gap-2">
         <MessageSquare className="w-5 h-5" />
         <CardTitle className="text-xl">Chat</CardTitle>

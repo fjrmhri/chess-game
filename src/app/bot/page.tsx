@@ -29,20 +29,55 @@ export default function BotPage() {
 
   return (
     <div className="min-h-screen bg-background p-4 lg:p-6">
-      <div className="max-w-6xl mx-auto space-y-4">
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <div>
-            <p className="text-sm text-muted-foreground">Local Practice</p>
-            <h1 className="text-2xl font-bold">Play vs Bot</h1>
-          </div>
-          <Button asChild variant="ghost">
-            <Link href="/">Back to lobby</Link>
-          </Button>
-        </div>
+      <div className="mx-auto max-w-7xl space-y-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <p className="text-sm text-muted-foreground">Local Practice</p>
+              <CardTitle className="text-2xl">Play vs Bot</CardTitle>
+            </div>
+            <Button asChild variant="ghost" size="sm">
+              <Link href="/">Back to lobby</Link>
+            </Button>
+          </CardHeader>
+        </Card>
 
-        <main className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-4">
-          <Card className="lg:row-span-2">
-            <CardContent className="p-3 sm:p-4 md:p-6 flex justify-center">
+        <main className="grid grid-cols-1 items-start gap-4 xl:gap-6 lg:grid-cols-[300px_minmax(520px,1fr)_300px]">
+          <div className="order-3 space-y-4 lg:order-1">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Practice settings</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  Choose your side and restart instantly without reloading the page. Bot play mirrors the multiplayer layout for a
+                  consistent feel.
+                </p>
+                <div className="flex gap-2">
+                  <Button
+                    variant={preferredColor === "w" ? "default" : "outline"}
+                    className="flex-1"
+                    onClick={() => handleColorSwitch("w")}
+                  >
+                    Play White
+                  </Button>
+                  <Button
+                    variant={preferredColor === "b" ? "default" : "outline"}
+                    className="flex-1"
+                    onClick={() => handleColorSwitch("b")}
+                  >
+                    Play Black
+                  </Button>
+                </div>
+                <Button variant="outline" className="w-full" onClick={() => resetGame(playerColor)}>
+                  Restart match
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card className="order-1 lg:order-2 lg:row-span-2">
+            <CardContent className="flex flex-col gap-4 p-4 sm:p-5 lg:p-6">
               <Board
                 chess={chess}
                 onMove={makePlayerMove}
@@ -50,43 +85,20 @@ export default function BotPage() {
                 isPlayerTurn={isPlayerTurn && !isGameOver}
                 isGameOver={isGameOver}
               />
+              <ActionBar
+                canMove={!isGameOver}
+                onResign={resign}
+                onReset={() => resetGame(playerColor)}
+                modeLabel="Bot match"
+                playerColor={playerColor}
+                turn={chess.turn()}
+                status={game.status}
+              />
             </CardContent>
           </Card>
 
-          <GameInfo game={game} chess={chess} playerColor={playerColor} />
-
-          <div className="space-y-4">
-            <ActionBar
-              canMove={!isGameOver}
-              onResign={resign}
-              onReset={() => resetGame(playerColor)}
-              modeLabel="Bot match"
-              playerColor={playerColor}
-              turn={chess.turn()}
-              status={game.status}
-            />
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Choose your color</CardTitle>
-              </CardHeader>
-              <CardContent className="flex gap-2">
-                <Button
-                  variant={preferredColor === "w" ? "default" : "outline"}
-                  className="flex-1"
-                  onClick={() => handleColorSwitch("w")}
-                >
-                  Play White
-                </Button>
-                <Button
-                  variant={preferredColor === "b" ? "default" : "outline"}
-                  className="flex-1"
-                  onClick={() => handleColorSwitch("b")}
-                >
-                  Play Black
-                </Button>
-              </CardContent>
-            </Card>
+          <div className="order-2 space-y-4 lg:order-3">
+            <GameInfo game={game} chess={chess} playerColor={playerColor} />
           </div>
         </main>
       </div>

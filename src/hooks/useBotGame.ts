@@ -19,7 +19,8 @@ export function useBotGame(options: UseBotGameOptions = {}) {
   const [status, setStatus] = useState<GameStatus>("in_progress");
   const [winner, setWinner] = useState<Color | null>(null);
   const [version, setVersion] = useState(0);
-  const searchDepth = options.depth ?? 3;
+  const searchDepth = options.depth ?? 4;
+  const searchTimeMs = 1400;
 
   const game: Game = useMemo(
     () => ({
@@ -87,12 +88,19 @@ export function useBotGame(options: UseBotGameOptions = {}) {
     const botColor: Color = playerColor === "w" ? "b" : "w";
     if (chess.turn() !== botColor) return;
 
-    const bestMove = findBestMove(chess, botColor, searchDepth);
-    if (bestMove) {
-      chess.move(bestMove);
-      refreshStatus();
-    }
-  }, [chess, playerColor, refreshStatus, searchDepth, status]);
+    const currentFen = chess.fen();
+    const timeout = setTimeout(() => {
+      const bestMove = findBestMove(chess, botColor, searchDepth, searchTimeMs);
+      if (status !== "in_progress") return;
+      if (chess.fen() !== currentFen) return;
+      if (bestMove) {
+        chess.move(bestMove);
+        refreshStatus();
+      }
+    }, 60);
+
+    return () => clearTimeout(timeout);
+  }, [chess, playerColor, refreshStatus, searchDepth, searchTimeMs, status]);
 
   useEffect(() => {
     if (playerColor === "b") {
@@ -104,7 +112,7 @@ export function useBotGame(options: UseBotGameOptions = {}) {
     if (status !== "in_progress") return;
     const botColor: Color = playerColor === "w" ? "b" : "w";
     if (chess.turn() === botColor) {
-      const timeout = setTimeout(() => triggerBotMove(), 250);
+      const timeout = setTimeout(() => triggerBotMove(), 200);
       return () => clearTimeout(timeout);
     }
     return undefined;
