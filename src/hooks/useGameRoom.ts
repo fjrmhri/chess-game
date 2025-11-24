@@ -58,7 +58,13 @@ export function useGameRoom(gameId: string) {
   }, []);
 
   useEffect(() => {
-    if (!gameId || !user) return;
+    if (!gameId) {
+      setError("Game ID tidak ditemukan.");
+      setLoading(false);
+      return;
+    }
+
+    if (!user) return;
 
     setLoading(true);
     const gameRef = doc(db, "games", gameId);

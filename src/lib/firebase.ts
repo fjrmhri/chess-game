@@ -1,17 +1,13 @@
-import { initializeApp, getApps } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import { getApps, initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
+
 import { firebaseConfig } from "@/config/firebase";
 
-// Initialize Firebase
-let app;
-if (!getApps().length) {
-  app = initializeApp(firebaseConfig);
-} else {
-  app = getApps()[0];
-}
+// Inisialisasi Firebase hanya sekali untuk mencegah error duplikasi app pada render ulang
+const app = getApps()[0] ?? initializeApp(firebaseConfig);
 
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-export { app, db, auth };
+export { app, auth, db };

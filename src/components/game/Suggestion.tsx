@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getAiSuggestion } from "@/app/actions";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Lightbulb, Loader2 } from "lucide-react";
+
+import { getAiSuggestion } from "@/app/actions";
 
 interface SuggestionProps {
   fen: string;
@@ -22,13 +24,21 @@ export function Suggestion({ fen, pgn, disabled }: SuggestionProps) {
     setLoading(true);
     setError(null);
     setSuggestion(null);
-    const result = await getAiSuggestion(fen, pgn);
-    if (result.success) {
-      setSuggestion(result.suggestion);
-    } else {
-      setError(result.error);
+
+    try {
+      // Meminta rekomendasi langkah dengan fallback agar UI tidak terjebak loading
+      const result = await getAiSuggestion(fen, pgn);
+      if (result.success) {
+        setSuggestion(result.suggestion);
+      } else {
+        setError(result.error ?? "Tidak dapat memuat saran langkah.");
+      }
+    } catch (fetchError) {
+      console.error("AI suggestion request failed:", fetchError);
+      setError("Gagal meminta saran. Silakan coba lagi.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (

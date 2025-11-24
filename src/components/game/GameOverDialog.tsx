@@ -1,5 +1,7 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,7 +11,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useRouter } from "next/navigation";
 import { GameStatus } from "@/types";
 import { Color } from "chess.js";
 
@@ -44,18 +45,17 @@ export function GameOverDialog({ status, playerColor, winner }: GameOverDialogPr
     description = `${winnerLabel} wins by resignation.`;
   }
 
+  // Mengarahkan pemain kembali ke lobby setelah dialog ditutup
   const handleGoHome = () => {
-    router.push('/');
-  }
+    router.push("/");
+  };
 
   return (
     <AlertDialog open={isOpen}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>
-            {description}
-          </AlertDialogDescription>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogAction onClick={handleGoHome}>

@@ -28,6 +28,7 @@ export function ActionBar({
 }: ActionBarProps) {
   const isYourTurn = playerColor && playerColor === turn;
 
+  // Panel tindakan menjaga aksi utama tetap mudah dijangkau dan transparan status giliran
   return (
     <Card>
       <CardHeader className="pb-3">

@@ -1,6 +1,10 @@
-import type {Metadata} from 'next';
-import './globals.css';
-import { Toaster } from "@/components/ui/toaster"
+import type { Metadata } from "next";
+import "./globals.css";
+
+import { Toaster } from "@/components/ui/toaster";
+
+// Tata letak root menjaga font dan toaster tersedia di seluruh aplikasi
+// sehingga halaman lain tidak perlu menginisialisasi ulang elemen global.
 
 export const metadata: Metadata = {
   title: "Chess Game",

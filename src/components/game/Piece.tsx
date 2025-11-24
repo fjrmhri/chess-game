@@ -2,8 +2,18 @@
 
 import { Piece as PieceType } from "chess.js";
 import {
-  WhiteKing, WhiteQueen, WhiteRook, WhiteBishop, WhiteKnight, WhitePawn,
-  BlackKing, BlackQueen, BlackRook, BlackBishop, BlackKnight, BlackPawn
+  BlackBishop,
+  BlackKing,
+  BlackKnight,
+  BlackPawn,
+  BlackQueen,
+  BlackRook,
+  WhiteBishop,
+  WhiteKing,
+  WhiteKnight,
+  WhitePawn,
+  WhiteQueen,
+  WhiteRook,
 } from "./ChessPieces";
 
 interface PieceProps {
@@ -30,12 +40,13 @@ const pieceMap = {
 };
 
 export function Piece({ piece }: PieceProps) {
+  // Memetakan tipe bidak ke komponen SVG agar Board bisa merender secara deklaratif
   const PieceComponent = pieceMap[piece.color][piece.type];
 
   if (!PieceComponent) return null;
 
   return (
-    <div className="relative w-full h-full p-1 cursor-pointer">
+    <div className="relative h-full w-full cursor-pointer p-1">
       <PieceComponent />
     </div>
   );

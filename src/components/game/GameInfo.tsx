@@ -1,9 +1,12 @@
 "use client";
 
-import { Game, PresenceSnapshot } from "@/types";
+import { useMemo } from "react";
+
 import { Chess, Color } from "chess.js";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Crown, Hourglass, Wifi } from "lucide-react";
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Game, PresenceSnapshot } from "@/types";
 
 interface GameInfoProps {
   game: Game;
@@ -22,25 +25,25 @@ const PlayerInfo = ({
   isYou: boolean;
   presence?: PresenceSnapshot;
 }) => (
-  <div className="flex flex-col items-center p-3 bg-muted/50 rounded-lg text-center">
-    <h4 className="font-bold text-sm">{title}</h4>
-    <p className="text-xs text-muted-foreground truncate w-full" title={id ?? "..."}>
+  <div className="flex flex-col items-center rounded-lg bg-muted/50 p-3 text-center">
+    <h4 className="text-sm font-bold">{title}</h4>
+    <p className="w-full truncate text-xs text-muted-foreground" title={id ?? "..."}>
       {id ?? "Waiting..."}
     </p>
-    <div className="flex items-center gap-1 text-[11px] text-muted-foreground mt-1">
+    <div className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
       <Wifi className={`h-3 w-3 ${presence?.online ? "text-primary" : "text-muted-foreground"}`} />
       <span>{presence?.online ? "Online" : "Offline"}</span>
     </div>
-    {isYou && <div className="text-xs font-bold text-primary mt-1">(You)</div>}
+    {isYou ? <div className="mt-1 text-xs font-bold text-primary">(You)</div> : null}
   </div>
 );
 
-
 export function GameInfo({ game, chess, playerColor }: GameInfoProps) {
   const { status, players, winner, mode, presence } = game;
-  const turn = chess.turn();
 
-  const getStatusText = () => {
+  // Menghindari hitung ulang teks status yang mahal ketika tidak ada perubahan terkait
+  const statusText = useMemo(() => {
+    const turn = chess.turn();
     switch (status) {
       case "waiting":
         return "Waiting for opponent...";
@@ -54,28 +57,26 @@ export function GameInfo({ game, chess, playerColor }: GameInfoProps) {
         return `${winner === "w" ? "White" : "Black"} wins by resignation.`;
       case "in_progress":
         if (chess.inCheck()) {
-            return `${turn === "w" ? "White" : "Black"} is in Check!`;
+          return `${turn === "w" ? "White" : "Black"} is in Check!`;
         }
         return `${turn === "w" ? "White's" : "Black's"} turn`;
       default:
         return "Game in progress";
     }
-  };
+  }, [chess, status, winner]);
 
-  const statusColor = chess.inCheck() ? 'text-accent' : 'text-foreground';
+  const statusColor = useMemo(() => (chess.inCheck() ? "text-accent" : "text-foreground"), [chess]);
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-xl">
-          {status === "in_progress" ? <Hourglass className="w-5 h-5" /> : <Crown className="w-5 h-5" />}
+          {status === "in_progress" ? <Hourglass className="h-5 w-5" /> : <Crown className="h-5 w-5" />}
           Game Status
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className={`text-center font-bold text-lg p-3 rounded-lg bg-card ${statusColor}`}>
-          {getStatusText()}
-        </div>
+        <div className={`rounded-lg bg-card p-3 text-center text-lg font-bold ${statusColor}`}>{statusText}</div>
 
         <div className="grid grid-cols-2 gap-4">
           <PlayerInfo

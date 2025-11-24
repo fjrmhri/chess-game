@@ -1,5 +1,5 @@
-// Minimalist chess piece SVGs as React components
-// Source: User:Cburnett, CC BY-SA 3.0, via Wikimedia Commons
+// Komponen SVG bidak catur bergaya minimalis
+// Sumber: User:Cburnett, CC BY-SA 3.0, via Wikimedia Commons
 
 import { SVGProps } from "react";
 

@@ -90,12 +90,17 @@ export function useBotGame(options: UseBotGameOptions = {}) {
 
     const currentFen = chess.fen();
     const timeout = setTimeout(() => {
-      const bestMove = findBestMove(chess, botColor, searchDepth, searchTimeMs);
-      if (status !== "in_progress") return;
-      if (chess.fen() !== currentFen) return;
-      if (bestMove) {
-        chess.move(bestMove);
-        refreshStatus();
+      try {
+        // Menjalankan perhitungan bot secara aman agar UI tidak crash ketika terjadi error evaluasi
+        const bestMove = findBestMove(chess, botColor, searchDepth, searchTimeMs);
+        if (status !== "in_progress") return;
+        if (chess.fen() !== currentFen) return;
+        if (bestMove) {
+          chess.move(bestMove);
+          refreshStatus();
+        }
+      } catch (moveError) {
+        console.error("Failed to generate bot move:", moveError);
       }
     }, 60);
 
@@ -112,7 +117,13 @@ export function useBotGame(options: UseBotGameOptions = {}) {
     if (status !== "in_progress") return;
     const botColor: Color = playerColor === "w" ? "b" : "w";
     if (chess.turn() === botColor) {
-      const timeout = setTimeout(() => triggerBotMove(), 200);
+      const timeout = setTimeout(() => {
+        try {
+          triggerBotMove();
+        } catch (error) {
+          console.error("Bot move failed:", error);
+        }
+      }, 200);
       return () => clearTimeout(timeout);
     }
     return undefined;
