@@ -3,8 +3,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'Firebase Chess Royale',
-  description: 'A real-time multiplayer chess game built with Firebase and Next.js',
+  title: "Chess Royale",
+  description: "A real-time multiplayer chess experience built with Next.js and Firebase.",
 };
 
 export default function RootLayout({
