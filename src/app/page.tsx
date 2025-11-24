@@ -89,11 +89,17 @@ export default function Home() {
                 </CardDescription>
               </div>
             </div>
-            <div className="text-sm font-medium text-muted-foreground">No reloads or popups—just play.</div>
           </div>
 
-          <CardContent className="p-6">
-            <div className="grid gap-6 md:grid-cols-[1.1fr_0.9fr] items-start">
+          <CardContent className="p-6 space-y-6">
+            <div className="space-y-3 rounded-lg border bg-muted/40 p-5 shadow-inner">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Multiplayer</p>
+                  <p className="text-lg font-semibold text-foreground">Play with friends</p>
+                </div>
+                <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">Live</span>
+              </div>
               <div className="space-y-3">
                 <Button
                   onClick={handleCreateGame}
@@ -105,7 +111,7 @@ export default function Home() {
                     <Swords className="h-5 w-5" />
                     <span>Start Multiplayer Room</span>
                   </div>
-                  {isCreating ? <Loader2 className="h-5 w-5 animate-spin" /> : <span className="text-sm">Live</span>}
+                  {isCreating ? <Loader2 className="h-5 w-5 animate-spin" /> : <span className="text-sm">Ready</span>}
                 </Button>
 
                 <form onSubmit={handleJoinGame} className="grid gap-3 rounded-lg border bg-card/60 p-4 shadow-inner md:grid-cols-[1.1fr_auto]">
@@ -131,22 +137,22 @@ export default function Home() {
                   ) : null}
                 </form>
               </div>
+            </div>
 
-              <div className="space-y-4 rounded-lg border bg-muted/40 p-5 shadow-inner">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Practice mode</p>
-                    <p className="text-lg font-semibold text-foreground">Play against the bot</p>
-                  </div>
-                  <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">Upgraded</span>
+            <div className="space-y-4 rounded-lg border bg-muted/40 p-5 shadow-inner">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Practice mode</p>
+                  <p className="text-lg font-semibold text-foreground">Play against the bot</p>
                 </div>
-                <p className="text-sm leading-relaxed text-muted-foreground">
-                  Train openings, explore ideas, and get instant feedback with the same polished board used in multiplayer.
-                </p>
-                <Button asChild variant="outline" className="w-full rounded-md border-primary/30 text-base font-semibold hover:bg-primary/10">
-                  <Link href="/bot">Practice vs Bot</Link>
-                </Button>
+                <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">Upgraded</span>
               </div>
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                Train openings, explore ideas, and get instant feedback with the same polished board used in multiplayer.
+              </p>
+              <Button asChild variant="outline" className="w-full rounded-md border-primary/30 text-base font-semibold hover:bg-primary/10">
+                <Link href="/bot">Practice vs Bot</Link>
+              </Button>
             </div>
           </CardContent>
         </Card>
