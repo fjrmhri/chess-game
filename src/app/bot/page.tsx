@@ -42,7 +42,7 @@ export default function BotPage() {
           </CardHeader>
         </Card>
 
-        <main className="grid grid-cols-1 items-start gap-4 xl:gap-6 lg:grid-cols-[300px_minmax(520px,1fr)_300px]">
+        <main className="grid grid-cols-1 items-start gap-4 xl:gap-6 lg:grid-cols-[280px_minmax(520px,1fr)_320px]">
           <div className="order-3 space-y-4 lg:order-1">
             <Card>
               <CardHeader>
@@ -50,7 +50,7 @@ export default function BotPage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 <p className="text-sm text-muted-foreground">
-                  Choose your side and restart instantly without reloading the page. Bot play mirrors the multiplayer layout for a
+                  Choose your side and keep playing without reloading the page. Bot play mirrors the multiplayer layout for a
                   consistent feel.
                 </p>
                 <div className="flex gap-2">
@@ -69,9 +69,6 @@ export default function BotPage() {
                     Play Black
                   </Button>
                 </div>
-                <Button variant="outline" className="w-full" onClick={() => resetGame(playerColor)}>
-                  Restart match
-                </Button>
               </CardContent>
             </Card>
           </div>
@@ -85,20 +82,20 @@ export default function BotPage() {
                 isPlayerTurn={isPlayerTurn && !isGameOver}
                 isGameOver={isGameOver}
               />
-              <ActionBar
-                canMove={!isGameOver}
-                onResign={resign}
-                onReset={() => resetGame(playerColor)}
-                modeLabel="Bot match"
-                playerColor={playerColor}
-                turn={chess.turn()}
-                status={game.status}
-              />
             </CardContent>
           </Card>
 
           <div className="order-2 space-y-4 lg:order-3">
             <GameInfo game={game} chess={chess} playerColor={playerColor} />
+            <ActionBar
+              canMove={!isGameOver}
+              onResign={resign}
+              onReset={() => resetGame(playerColor)}
+              modeLabel="Bot match"
+              playerColor={playerColor}
+              turn={chess.turn()}
+              status={game.status}
+            />
           </div>
         </main>
       </div>

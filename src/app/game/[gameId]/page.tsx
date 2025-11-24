@@ -68,8 +68,9 @@ export default function GamePage() {
           </CardHeader>
         </Card>
 
-        <main className="grid grid-cols-1 items-start gap-4 xl:gap-6 lg:grid-cols-[300px_minmax(520px,1fr)_300px]">
+        <main className="grid grid-cols-1 items-start gap-4 xl:gap-6 lg:grid-cols-[320px_minmax(520px,1fr)_320px]">
           <div className="order-3 space-y-4 lg:order-1">
+            <Suggestion fen={chess.fen()} pgn={chess.pgn()} disabled={!isPlayerTurn || isGameOver} />
             <Chat playerColor={playerColor} messages={chatMessages} onSendMessage={sendMessage} />
           </div>
 
@@ -82,20 +83,19 @@ export default function GamePage() {
                 isPlayerTurn={isPlayerTurn}
                 isGameOver={isGameOver}
               />
-              <ActionBar
-                canMove={!isGameOver}
-                onResign={resign}
-                modeLabel="Multiplayer"
-                playerColor={playerColor}
-                turn={chess.turn()}
-                status={game.status}
-              />
             </CardContent>
           </Card>
 
           <div className="order-2 space-y-4 lg:order-3">
             <GameInfo game={game} chess={chess} playerColor={playerColor} />
-            <Suggestion fen={chess.fen()} pgn={chess.pgn()} disabled={!isPlayerTurn || isGameOver} />
+            <ActionBar
+              canMove={!isGameOver}
+              onResign={resign}
+              modeLabel="Multiplayer"
+              playerColor={playerColor}
+              turn={chess.turn()}
+              status={game.status}
+            />
           </div>
         </main>
       </div>
@@ -107,8 +107,9 @@ export default function GamePage() {
 function GameLoadingSkeleton() {
   return (
     <div className="min-h-screen bg-background p-4 lg:p-6">
-      <main className="mx-auto grid max-w-7xl grid-cols-1 items-start gap-4 xl:gap-6 lg:grid-cols-[300px_minmax(520px,1fr)_300px]">
+      <main className="mx-auto grid max-w-7xl grid-cols-1 items-start gap-4 xl:gap-6 lg:grid-cols-[320px_minmax(520px,1fr)_320px]">
         <div className="order-3 space-y-4 lg:order-1">
+          <Skeleton className="h-40 w-full" />
           <Skeleton className="h-96 w-full" />
         </div>
         <Card className="order-1 lg:order-2 lg:row-span-2">
