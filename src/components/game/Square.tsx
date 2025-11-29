@@ -21,24 +21,24 @@ export function Square({
   inCheck,
   onClick,
 }: SquareProps) {
-  const file = square.charCodeAt(0);
-  const rank = parseInt(square.charAt(1), 10);
-  const isLightSquare = (file + rank) % 2 !== 0;
-
   return (
     <div
       onClick={onClick}
       className={cn(
-        "w-[12.5%] aspect-square flex items-center justify-center relative",
-        isLightSquare ? "bg-background/80" : "bg-primary/20",
-        isSelected && "bg-accent/50",
-        inCheck && "bg-destructive/50"
+        "w-[12.5%] aspect-square flex items-center justify-center relative transition-colors",
+        isSelected && "bg-accent/40",
+        inCheck && "bg-destructive/40"
       )}
     >
       {piece && <Piece piece={piece} />}
       {isPossibleMove && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className={cn("rounded-full", piece ? "w-full h-full border-4 border-accent/50" : "w-1/3 h-1/3 bg-accent/50")}></div>
+          <div
+            className={cn(
+              "rounded-full",
+              piece ? "w-full h-full border-4 border-accent/50" : "w-1/3 h-1/3 bg-accent/50"
+            )}
+          ></div>
         </div>
       )}
     </div>

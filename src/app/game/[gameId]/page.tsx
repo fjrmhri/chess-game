@@ -13,10 +13,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Swords, Info } from "lucide-react";
+import { useBoardPreference } from "@/hooks/useBoardPreference";
 
 export default function GamePage() {
   const params = useParams();
   const gameId = params.gameId as string;
+  const { boardTexture } = useBoardPreference();
   const {
     game,
     chess,
@@ -82,6 +84,7 @@ export default function GamePage() {
                 playerColor={playerColor}
                 isPlayerTurn={isPlayerTurn}
                 isGameOver={isGameOver}
+                boardTexture={boardTexture}
               />
             </CardContent>
           </Card>

@@ -6,14 +6,17 @@ import { Color } from "chess.js";
 
 import { ActionBar } from "@/components/game/ActionBar";
 import { Board } from "@/components/game/Board";
+import { BoardSelector } from "@/components/game/BoardSelector";
 import { GameInfo } from "@/components/game/GameInfo";
 import { GameOverDialog } from "@/components/game/GameOverDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useBoardPreference } from "@/hooks/useBoardPreference";
 import { useBotGame } from "@/hooks/useBotGame";
 
 export default function BotPage() {
   const [preferredColor, setPreferredColor] = useState<Color>("w");
+  const { boardId, boardTexture, setBoardId } = useBoardPreference();
   const { game, chess, playerColor, setPlayerColor, makePlayerMove, resign, resetGame } = useBotGame({
     playerColor: preferredColor,
   });
@@ -69,6 +72,13 @@ export default function BotPage() {
                     Play Black
                   </Button>
                 </div>
+                <div className="space-y-2 pt-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <p className="font-medium text-foreground">Board style</p>
+                    <span className="text-xs text-muted-foreground">Used in all modes</span>
+                  </div>
+                  <BoardSelector value={boardId} onChange={setBoardId} />
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -81,6 +91,7 @@ export default function BotPage() {
                 playerColor={playerColor}
                 isPlayerTurn={isPlayerTurn && !isGameOver}
                 isGameOver={isGameOver}
+                boardTexture={boardTexture}
               />
             </CardContent>
           </Card>

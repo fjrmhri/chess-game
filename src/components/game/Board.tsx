@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { Chess } from "chess.js";
-import type { Color, Piece, Square as ChessSquare } from "chess.js";
+import type { Color, Square as ChessSquare } from "chess.js";
 import { Square } from "./Square";
 
 interface BoardProps {
@@ -11,9 +11,10 @@ interface BoardProps {
   playerColor: Color | null;
   isPlayerTurn: boolean;
   isGameOver: boolean;
+  boardTexture: string;
 }
 
-export function Board({ chess, onMove, playerColor, isPlayerTurn, isGameOver }: BoardProps) {
+export function Board({ chess, onMove, playerColor, isPlayerTurn, isGameOver, boardTexture }: BoardProps) {
   const [selectedPiece, setSelectedPiece] = useState<ChessSquare | null>(null);
 
   const board = chess.board();
@@ -59,31 +60,40 @@ export function Board({ chess, onMove, playerColor, isPlayerTurn, isGameOver }: 
 
     return `${String.fromCharCode(97 + colIndex)}${8 - rowIndex}` as ChessSquare;
   };
-  
+
   const possibleMoves = selectedPiece
     ? chess.moves({ square: selectedPiece, verbose: true }).map((move) => move.to)
     : [];
 
   return (
-    <div className="relative aspect-square w-full max-w-[520px] md:max-w-[560px] mx-auto select-none">
-      {boardOrientation.map((row, rowIndex) => (
-        <div key={rowIndex} className="flex">
-          {row.map((piece, colIndex) => {
-            const square = getSquareFromIndex(rowIndex, colIndex);
-            return (
-              <Square
-                key={square}
-                square={square}
-                piece={piece}
-                isSelected={selectedPiece === square}
-                isPossibleMove={possibleMoves.includes(square)}
-                inCheck={chess.inCheck() && piece?.type === "k" && piece?.color === chess.turn()}
-                onClick={() => handleSquareClick(square)}
-              />
-            );
-          })}
-        </div>
-      ))}
+    <div
+      className="relative aspect-square w-full max-w-[520px] md:max-w-[560px] mx-auto select-none overflow-hidden rounded-xl shadow-lg"
+      style={{
+        backgroundImage: `url(${boardTexture})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
+      <div className="absolute inset-0 flex flex-col">
+        {boardOrientation.map((row, rowIndex) => (
+          <div key={rowIndex} className="flex flex-1">
+            {row.map((piece, colIndex) => {
+              const square = getSquareFromIndex(rowIndex, colIndex);
+              return (
+                <Square
+                  key={square}
+                  square={square}
+                  piece={piece}
+                  isSelected={selectedPiece === square}
+                  isPossibleMove={possibleMoves.includes(square)}
+                  inCheck={chess.inCheck() && piece?.type === "k" && piece?.color === chess.turn()}
+                  onClick={() => handleSquareClick(square)}
+                />
+              );
+            })}
+          </div>
+        ))}
+      </div>
       {isGameOver && (
         <div className="absolute inset-0 bg-background/70 flex items-center justify-center">
           <span className="text-4xl font-bold text-foreground font-headline">Game Over</span>

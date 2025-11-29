@@ -10,8 +10,10 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { BoardSelector } from "@/components/game/BoardSelector";
 import { db } from "@/lib/firebase";
 import { Game } from "@/types";
+import { useBoardPreference } from "@/hooks/useBoardPreference";
 
 export default function Home() {
   const router = useRouter();
@@ -19,6 +21,7 @@ export default function Home() {
   const [isCreating, setIsCreating] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const { boardId, setBoardId, boardLabel } = useBoardPreference();
 
   const handleCreateGame = async () => {
     setIsCreating(true);
@@ -136,6 +139,27 @@ export default function Home() {
                     </p>
                   ) : null}
                 </form>
+              </div>
+            </div>
+
+            <div className="space-y-4 rounded-lg border bg-muted/30 p-5 shadow-inner">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Board appearance</p>
+                  <p className="text-lg font-semibold text-foreground">Choose your board</p>
+                </div>
+                <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">Shared</span>
+              </div>
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                Pick a board texture before you start. Your choice will follow you into both multiplayer rooms and bot practice
+                until you change it again.
+              </p>
+              <div className="rounded-lg bg-background/80 p-3">
+                <div className="mb-2 flex items-center justify-between text-sm">
+                  <span className="font-medium text-foreground">Current: {boardLabel}</span>
+                  <span className="text-xs text-muted-foreground">Applies to all games</span>
+                </div>
+                <BoardSelector value={boardId} onChange={setBoardId} />
               </div>
             </div>
 
