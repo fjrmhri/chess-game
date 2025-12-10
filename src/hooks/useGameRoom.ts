@@ -67,11 +67,9 @@ export function useGameRoom(gameId: string) {
       return;
     }
 
-    if (!user) return;
-
-    setLoading(true);
     const gameRef = doc(db, "games", gameId);
 
+    setLoading(true);
     const gameUnsubscribe = onSnapshot(
       gameRef,
       (docSnap) => {
@@ -90,6 +88,14 @@ export function useGameRoom(gameId: string) {
               } as Game["presence"]),
             inviteCode: rawData.inviteCode ?? "",
           } as Game;
+
+          setGame(gameData);
+          setError(null);
+
+          if (!user) {
+            setLoading(false);
+            return;
+          }
 
           if (
             user.uid !== gameData.players.w &&
@@ -136,8 +142,6 @@ export function useGameRoom(gameId: string) {
               });
             }
           }
-          setGame(gameData);
-          setError(null);
         } else {
           setError("Game not found.");
         }
@@ -149,10 +153,19 @@ export function useGameRoom(gameId: string) {
       }
     );
 
+    return () => {
+      gameUnsubscribe();
+    };
+  }, [gameId, toast, user]);
+
+  useEffect(() => {
+    if (!gameId) return;
+
     const chatQuery = query(
       collection(db, `games/${gameId}/chat`),
       orderBy("timestamp", "asc")
     );
+
     const chatUnsubscribe = onSnapshot(
       chatQuery,
       (querySnapshot) => {
@@ -179,11 +192,8 @@ export function useGameRoom(gameId: string) {
       }
     );
 
-    return () => {
-      gameUnsubscribe();
-      chatUnsubscribe();
-    };
-  }, [gameId, toast, user]);
+    return () => chatUnsubscribe();
+  }, [gameId, toast]);
 
   const makeMove = useCallback(
     async (from: Square, to: Square) => {
