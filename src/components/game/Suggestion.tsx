@@ -29,13 +29,15 @@ export function Suggestion({ fen, pgn, disabled }: SuggestionProps) {
 
     try {
       const result = await getAiSuggestion(fen, pgn);
-      if (result.success) {
+      if (result.success && result.suggestion) {
         setSuggestion(result.suggestion);
       } else {
-        setError(result.error ?? "Tidak dapat memuat saran langkah.");
+        setSuggestion(null);
+        setError(
+          result.error ?? "Tidak dapat memuat saran langkah atau saran kosong."
+        );
       }
     } catch (fetchError) {
-      console.error("AI suggestion request failed:", fetchError);
       setError("Gagal meminta saran. Silakan coba lagi.");
     } finally {
       setLoading(false);

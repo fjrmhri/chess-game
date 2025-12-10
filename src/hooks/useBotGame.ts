@@ -34,6 +34,7 @@ export function useBotGame(options: UseBotGameOptions = {}) {
       turn: chess.turn(),
       winner,
       mode: "bot",
+      inviteCode: "",
     }),
     [chess, status, winner, version]
   );
@@ -106,7 +107,9 @@ export function useBotGame(options: UseBotGameOptions = {}) {
           refreshStatus();
         }
       } catch (moveError) {
-        console.error("Failed to generate bot move:", moveError);
+        setStatus("resigned");
+        setWinner(playerColor);
+        setVersion((v) => v + 1);
       }
     }, 60);
 
@@ -127,7 +130,9 @@ export function useBotGame(options: UseBotGameOptions = {}) {
         try {
           triggerBotMove();
         } catch (error) {
-          console.error("Bot move failed:", error);
+          setStatus("resigned");
+          setWinner(playerColor);
+          setVersion((v) => v + 1);
         }
       }, 200);
       return () => clearTimeout(timeout);

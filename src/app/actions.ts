@@ -7,7 +7,6 @@ export async function getAiSuggestion(fen: string, pgn: string) {
     const result = await aiMoveSuggestion({ boardState: fen, moveHistory: pgn });
     return { success: true, suggestion: result.suggestedMove };
   } catch (error) {
-    console.error("Error getting AI suggestion:", error);
     return { success: false, error: "Failed to get suggestion from AI." };
   }
 }

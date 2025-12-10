@@ -52,9 +52,8 @@ export function useGameRoom(gameId: string) {
       if (currentUser) {
         setUser(currentUser);
       } else {
-        signInAnonymously(auth).catch((err) => {
+        signInAnonymously(auth).catch(() => {
           setError("Failed to sign in. Please refresh the page.");
-          console.error("Anonymous sign-in error:", err);
         });
       }
     });
@@ -81,12 +80,15 @@ export function useGameRoom(gameId: string) {
           const gameData = {
             id: docSnap.id,
             winner: null,
-            mode: "multiplayer" as const,
-            presence: {
-              w: { online: false, lastActive: null },
-              b: { online: false, lastActive: null },
-            },
             ...rawData,
+            mode: (rawData.mode as Game["mode"]) ?? "multiplayer",
+            presence:
+              rawData.presence ??
+              ({
+                w: { online: false, lastActive: null },
+                b: { online: false, lastActive: null },
+              } as Game["presence"]),
+            inviteCode: rawData.inviteCode ?? "",
           } as Game;
 
           if (
@@ -105,8 +107,12 @@ export function useGameRoom(gameId: string) {
                     lastActive: null,
                   },
                 },
-              }).catch((joinError) => {
-                console.error("Failed to join as white:", joinError);
+              }).catch(() => {
+                toast({
+                  title: "Unable to join",
+                  description: "Failed to reserve the white seat.",
+                  variant: "destructive",
+                });
               });
             } else if (gameData.players.b === null) {
               updateDoc(gameRef, {
@@ -121,8 +127,12 @@ export function useGameRoom(gameId: string) {
                     lastActive: null,
                   },
                 },
-              }).catch((joinError) => {
-                console.error("Failed to join as black:", joinError);
+              }).catch(() => {
+                toast({
+                  title: "Unable to join",
+                  description: "Failed to reserve the black seat.",
+                  variant: "destructive",
+                });
               });
             }
           }
@@ -133,8 +143,7 @@ export function useGameRoom(gameId: string) {
         }
         setLoading(false);
       },
-      (err) => {
-        console.error("Game snapshot error:", err);
+      () => {
         setError("Failed to load game data.");
         setLoading(false);
       }
@@ -147,14 +156,21 @@ export function useGameRoom(gameId: string) {
     const chatUnsubscribe = onSnapshot(
       chatQuery,
       (querySnapshot) => {
-        const messages: ChatMessage[] = [];
-        querySnapshot.forEach((chatDoc) => {
-          messages.push({ id: chatDoc.id, ...chatDoc.data() } as ChatMessage);
-        });
-        setChatMessages(messages);
+        const messages = querySnapshot.docs
+          .map((chatDoc) => ({ id: chatDoc.id, ...chatDoc.data() } as ChatMessage))
+          .sort((a, b) => {
+            const aTime = a.timestamp?.toMillis?.() ?? 0;
+            const bTime = b.timestamp?.toMillis?.() ?? 0;
+            return aTime - bTime;
+          });
+
+        const uniqueMessages = Array.from(
+          new Map(messages.map((msg) => [msg.id, msg])).values()
+        );
+
+        setChatMessages(uniqueMessages);
       },
-      (err) => {
-        console.error("Chat snapshot error:", err);
+      () => {
         toast({
           title: "Chat Error",
           description: "Tidak dapat memuat pesan obrolan.",
@@ -208,7 +224,6 @@ export function useGameRoom(gameId: string) {
             : game.presence,
         });
       } catch (e) {
-        console.error("Failed to make move:", e);
         chess.undo();
         setGame(game);
         toast({
@@ -223,20 +238,11 @@ export function useGameRoom(gameId: string) {
 
   const resign = useCallback(async () => {
     if (!playerColor) return;
-    try {
-      await updateDoc(doc(db, "games", gameId), {
-        status: "resigned",
-        winner: playerColor === "w" ? "b" : "w",
-        lastMoveAt: serverTimestamp(),
-      });
-    } catch (error) {
-      console.error("Failed to resign:", error);
-      toast({
-        title: "Resign Failed",
-        description: "Unable to resign right now. Please try again.",
-        variant: "destructive",
-      });
-    }
+    await updateDoc(doc(db, "games", gameId), {
+      status: "resigned",
+      winner: playerColor === "w" ? "b" : "w",
+      lastMoveAt: serverTimestamp(),
+    });
   }, [gameId, playerColor, toast]);
 
   const sendMessage = useCallback(
@@ -250,7 +256,6 @@ export function useGameRoom(gameId: string) {
           timestamp: serverTimestamp(),
         });
       } catch (e) {
-        console.error("Failed to send message:", e);
         toast({
           title: "Chat Error",
           description: "Could not send your message.",
@@ -272,10 +277,14 @@ export function useGameRoom(gameId: string) {
           },
         });
       } catch (err) {
-        console.error("Failed to update presence", err);
+        toast({
+          title: "Connection issue",
+          description: "Presence could not be updated.",
+          variant: "destructive",
+        });
       }
     },
-    [game?.presence, gameId, playerColor]
+    [game?.presence, gameId, playerColor, toast]
   );
 
   useEffect(() => {

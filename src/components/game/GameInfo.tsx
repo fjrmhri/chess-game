@@ -1,10 +1,14 @@
 "use client";
 
+import { useState } from "react";
+
 import { Chess, Color } from "chess.js";
 import { Crown, Hourglass, Wifi } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Game, PresenceSnapshot } from "@/types";
+import { useToast } from "@/hooks/use-toast";
 
 interface GameInfoProps {
   game: Game;
@@ -49,6 +53,19 @@ export function GameInfo({ game, chess, playerColor }: GameInfoProps) {
   const { status, players, winner, mode, presence } = game;
   const turn = chess.turn();
   const inCheck = chess.inCheck();
+  const { toast } = useToast();
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyInvite = async () => {
+    if (!game.inviteCode) return;
+    await navigator.clipboard.writeText(game.inviteCode);
+    setCopied(true);
+    toast({
+      title: "Invite code copied",
+      description: "Bagikan kode ini kepada teman Anda.",
+    });
+    setTimeout(() => setCopied(false), 1500);
+  };
 
   const statusText = (() => {
     switch (status) {
@@ -107,6 +124,25 @@ export function GameInfo({ game, chess, playerColor }: GameInfoProps) {
             presence={presence?.b}
           />
         </div>
+
+        {game.inviteCode ? (
+          <div className="space-y-2 rounded-lg border bg-muted/40 p-3">
+            <div className="flex items-center justify-between">
+              <div className="text-sm font-semibold text-muted-foreground">
+                Invite Code
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleCopyInvite}
+                disabled={copied}
+              >
+                {copied ? "Copied" : "Copy"}
+              </Button>
+            </div>
+            <div className="font-mono text-lg tracking-widest">{game.inviteCode}</div>
+          </div>
+        ) : null}
 
         <div className="rounded-md border bg-muted/60 px-3 py-2 text-xs text-muted-foreground">
           Mode: {mode === "bot" ? "Play vs Bot" : "Multiplayer"}

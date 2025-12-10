@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { db } from "@/lib/firebase";
+import { createUniqueInviteCode, normalizeInviteCode } from "@/lib/invite";
 import { Game } from "@/types";
 
 export default function Home() {
@@ -35,6 +36,7 @@ export default function Home() {
     setIsCreating(true);
     setActionError(null);
     try {
+      const inviteCode = await createUniqueInviteCode();
       const newGame: Omit<Game, "id"> = {
         fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
         pgn: "",
@@ -49,31 +51,52 @@ export default function Home() {
           b: { online: false, lastActive: null },
         },
         lastMoveAt: null,
+        inviteCode,
       };
       const gameCollection = collection(db, "games");
       const docRef = await addDoc(gameCollection, newGame);
       router.push(`/game/${docRef.id}`);
     } catch (error) {
-      console.error("Error creating game:", error);
       setActionError("Gagal membuat permainan baru. Silakan coba lagi.");
     } finally {
       setIsCreating(false);
     }
   };
 
-  const handleJoinGame = (e: React.FormEvent) => {
+  const handleJoinGame = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!joinCode.trim()) {
+    const trimmedCode = normalizeInviteCode(joinCode);
+
+    if (!trimmedCode) {
       setActionError("Kode permainan tidak boleh kosong.");
       return;
     }
 
+    setIsJoining(true);
+    setActionError(null);
+
     try {
-      setIsJoining(true);
-      router.push(`/game/${joinCode.trim()}`);
+      const response = await fetch("/api/join", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ inviteCode: trimmedCode }),
+      });
+
+      const data = (await response.json().catch(() => ({}))) as {
+        gameId?: string;
+        error?: string;
+      };
+
+      if (!response.ok || !data.gameId) {
+        setActionError(
+          data.error || "Tidak dapat bergabung ke permainan. Pastikan kode benar."
+        );
+        return;
+      }
+
+      router.push(`/game/${data.gameId}`);
     } catch (error) {
-      console.error("Error joining game:", error);
       setActionError(
         "Tidak dapat bergabung ke permainan. Pastikan kode benar."
       );

@@ -31,6 +31,7 @@ export interface Game {
   chat?: ChatMessage[];
   presence?: PresenceState;
   lastMoveAt?: Timestamp | null;
+  inviteCode: string;
 }
 
 export interface ChatMessage {
